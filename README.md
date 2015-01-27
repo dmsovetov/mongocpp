@@ -1,5 +1,4 @@
 [![Build Status](https://travis-ci.org/dmsovetov/mongocpp.svg)](https://travis-ci.org/dmsovetov/mongocpp)
-
 # mongocpp
 MongoDB C API wrapper
 
