@@ -26,13 +26,14 @@
 
  **************************************************************************/
 
-#ifndef __DataMining__Mongo__
-#define __DataMining__Mongo__
-
-#include "Common.h"
+#ifndef __Mongocpp_Mongo_H__
+#define __Mongocpp_Mongo_H__
 
 #include <mongoc.h>
 #include <bcon.h>
+#include <set>
+#include <vector>
+#include <string>
 
 #define DOCUMENT( x )   (mongo::BSON::object() << x)
 #define ARRAY( x )      (mongo::BSON::array()  << x)
@@ -48,7 +49,16 @@ namespace mongo {
     typedef std::shared_ptr<class BulkOperation>    BulkOperationPtr;
     typedef std::set<std::string>                   StringSet;
     typedef std::set<int>                           IntegerSet;
+	typedef std::vector<int>						IntegerArray;
     typedef std::vector<float>                      FloatArray;
+
+	//! Converts an integer to a string.
+	std::string toString( int value )
+	{
+		char buf[32];
+		sprintf( buf, "%d", value );
+		return buf;
+	}
 
     // ** class OID
     class OID {
@@ -218,4 +228,4 @@ namespace mongo {
 }
 
 
-#endif /* defined(__DataMining__Mongo__) */
+#endif /*	!__Mongocpp_Mongo_H__	*/

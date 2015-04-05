@@ -494,7 +494,7 @@ std::string BSON::toString( void ) const
 // ** BSON::nextKey
 void BSON::nextKey( void )
 {
-    m_key = m_isArray ? std::to_string( atoi( m_key.c_str() ) + 1 ) : "";
+    m_key = m_isArray ? ::mongo::toString( atoi( m_key.c_str() ) + 1 ) : "";
 }
 
 // ** BSON::operator <<
