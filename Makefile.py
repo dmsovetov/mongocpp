@@ -1,0 +1,1 @@
+StaticLibrary( 'mongocpp', sources = [ '*' ] )
