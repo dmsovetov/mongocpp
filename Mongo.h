@@ -53,7 +53,7 @@ namespace mongo {
     typedef std::vector<float>                      FloatArray;
 
 	//! Converts an integer to a string.
-	std::string toString( int value )
+	inline std::string toString( int value )
 	{
 		char buf[32];
 		sprintf( buf, "%d", value );
