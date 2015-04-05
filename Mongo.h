@@ -83,6 +83,7 @@ namespace mongo {
 
         BSON&                   operator << ( int value );
         BSON&                   operator << ( float value );
+		BSON&                   operator << ( double value );
         BSON&                   operator << ( const BSON* value );
         BSON&                   operator << ( const char* value );
         BSON&                   operator << ( const std::string& value );
@@ -100,7 +101,7 @@ namespace mongo {
         static BSON             object( void );
         static BSON             fromBSON( const bson_t* bson );
 
-    private:
+    public:
 
                                 BSON( bool isArray = false );
                                 BSON( const bson_t* value );

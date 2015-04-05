@@ -520,6 +520,17 @@ BSON& BSON::operator << ( float value )
 }
 
 // ** BSON::operator <<
+BSON& BSON::operator << ( double value )
+{
+	assert( m_key != "" );
+
+	bson_append_double( &m_bson, m_key.c_str(), ( int )m_key.length(), value );
+	nextKey();
+
+	return *this;
+}
+
+// ** BSON::operator <<
 BSON& BSON::operator << ( const BSON* value )
 {
     assert( m_key != "" );
