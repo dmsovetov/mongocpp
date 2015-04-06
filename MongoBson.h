@@ -87,11 +87,14 @@ namespace mongo {
 
     public:
 
+		//! Internal BSON pointer type.
+		typedef std::shared_ptr<bson_t>	BsonPtr;
+
 								//! Constructs a BSON instance.
                                 BSON( bool isArray = false );
 
 								//! Constructs a BSON instance from internal MongoDB BSON.
-                                BSON( const bson_t* value );
+                                BSON( const BsonPtr& bson );
 
 		//! Generates a next BSON key.
         void                    nextKey( void );
@@ -105,7 +108,7 @@ namespace mongo {
         std::string             m_key;
 
 		//! Internal BSON object.
-        bson_t                  m_bson;
+		BsonPtr					m_bson;
     };
 
 } // namespace mongo

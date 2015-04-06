@@ -33,14 +33,14 @@ namespace mongo {
 // ** BSON::BSON
 BSON::BSON( bool isArray ) : m_isArray( isArray ), m_key( isArray ? "0" : "" )
 {
-    bson_init( &m_bson );
+	m_bson = BsonPtr( new bson_t );
+	bson_init( m_bson.get() );
 }
 
 // ** BSON::BSON
-BSON::BSON( const bson_t* value ) : m_isArray( false )
+BSON::BSON( const BsonPtr& value ) : m_isArray( false ), m_bson( value )
 {
-    bson_init( &m_bson );
-    bson_copy_to( value, &m_bson );
+
 }
 
 // ** BSON::object
@@ -64,25 +64,26 @@ BSON BSON::fromBSON( const bson_t* bson )
 // ** BSON::value
 const bson_t* BSON::value( void ) const
 {
-    return &m_bson;
+	return m_bson.get();
 }
 
 // ** BSON::remove
 void BSON::remove( const std::string& key )
 {
-    bson_t result;
+	assert( false );
+//    bson_t result;
 
-    bson_init( &result );
-    bson_copy_to_excluding( &m_bson, &result, key.c_str(), NULL );
-    bson_destroy( &m_bson );
+//    bson_init( &result );
+//    bson_copy_to_excluding( m_bson.get(), &result, key.c_str(), NULL );
+//    bson_destroy( m_bson.get() );
 
-    m_bson = result;
+//    m_bson = result;
 }
 
 // ** BSON::toString
 std::string BSON::toString( void ) const
 {
-    return bson_as_json( &m_bson, NULL );
+    return bson_as_json( m_bson.get(), NULL );
 }
 
 // ** BSON::nextKey
@@ -96,7 +97,7 @@ BSON& BSON::operator << ( int value )
 {
     assert( m_key != "" );
 
-    bson_append_int32( &m_bson, m_key.c_str(), ( int )m_key.length(), value );
+    bson_append_int32( m_bson.get(), m_key.c_str(), ( int )m_key.length(), value );
     nextKey();
     
     return *this;
@@ -107,7 +108,7 @@ BSON& BSON::operator << ( float value )
 {
     assert( m_key != "" );
 
-    bson_append_double( &m_bson, m_key.c_str(), ( int )m_key.length(), value );
+    bson_append_double( m_bson.get(), m_key.c_str(), ( int )m_key.length(), value );
     nextKey();
 
     return *this;
@@ -118,7 +119,7 @@ BSON& BSON::operator << ( double value )
 {
 	assert( m_key != "" );
 
-	bson_append_double( &m_bson, m_key.c_str(), ( int )m_key.length(), value );
+	bson_append_double( m_bson.get(), m_key.c_str(), ( int )m_key.length(), value );
 	nextKey();
 
 	return *this;
@@ -133,7 +134,7 @@ BSON& BSON::operator << ( const BSON* value )
         return *this << *value;
     }
 
-    bson_append_null( &m_bson, m_key.c_str(), ( int )m_key.length() );
+    bson_append_null( m_bson.get(), m_key.c_str(), ( int )m_key.length() );
     nextKey();
 
     return *this;
@@ -145,7 +146,7 @@ BSON& BSON::operator << ( const char* value )
     if( m_key == "" ) {
         m_key = value;
     } else {
-        bson_append_utf8( &m_bson, m_key.c_str(), ( int )m_key.length(), value, ( int )strlen( value ) );
+        bson_append_utf8( m_bson.get(), m_key.c_str(), ( int )m_key.length(), value, ( int )strlen( value ) );
         nextKey();
     }
 
@@ -158,7 +159,7 @@ BSON& BSON::operator << ( const std::string& value )
     if( m_key == "" ) {
         m_key = value;
     } else {
-        bson_append_utf8( &m_bson, m_key.c_str(), ( int )m_key.length(), value.c_str(), ( int )value.length() );
+        bson_append_utf8( m_bson.get(), m_key.c_str(), ( int )m_key.length(), value.c_str(), ( int )value.length() );
         nextKey();
     }
     
@@ -195,9 +196,9 @@ BSON& BSON::operator << ( const BSON& value )
     assert( m_key != "" );
 
     if( value.m_isArray ) {
-        bson_append_array( &m_bson, m_key.c_str(), ( int )m_key.length(), &value.m_bson );
+        bson_append_array( m_bson.get(), m_key.c_str(), ( int )m_key.length(), value.m_bson.get() );
     } else {
-        bson_append_document( &m_bson, m_key.c_str(), ( int )m_key.length(), &value.m_bson );
+        bson_append_document( m_bson.get(), m_key.c_str(), ( int )m_key.length(), value.m_bson.get() );
     }
 
     nextKey();
@@ -209,7 +210,7 @@ BSON& BSON::operator << ( const BSON& value )
 BSON& BSON::operator << ( const OID& value )
 {
     assert( m_key != "" );
-    bson_append_oid( &m_bson, m_key.c_str(), ( int )m_key.length(), value.value() );
+    bson_append_oid( m_bson.get(), m_key.c_str(), ( int )m_key.length(), value.value() );
     nextKey();
     
     return *this;
