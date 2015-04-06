@@ -34,6 +34,7 @@
 #include <set>
 #include <vector>
 #include <string>
+#include <memory>
 
 #define DOCUMENT( x )   (mongo::BSON::object() << x)
 #define ARRAY( x )      (mongo::BSON::array()  << x)
@@ -52,67 +53,45 @@ namespace mongo {
 	typedef std::vector<int>						IntegerArray;
     typedef std::vector<float>                      FloatArray;
 
+	class BSON;
+
 	//! Converts an integer to a string.
 	inline std::string toString( int value )
 	{
 		char buf[32];
-		sprintf( buf, "%d", value );
+		sprintf_s( buf, 32, "%d", value );
 		return buf;
 	}
 
-    // ** class OID
+    //! Class that wraps the MongoDB ObjectId type.
     class OID {
     public:
 
+								//! Constructs OID instance from BSON object id.
                                 OID( bson_oid_t oid );
+
+								//! Construcst OID instance from ObjectId string.
                                 OID( const std::string& oid );
 
+		//! Compares two OID instances.
         bool                    operator == ( const OID& other ) const;
 
+		//! Returns the BSON ObjectId value.
         const bson_oid_t*       value( void ) const;
+
+		//! Returns a byte representation of an ObjectId.
+		const unsigned char*	bytes( void ) const;
+
+		//! Convers the ObjectId to a string.
         std::string             toString( void ) const;
+
+		//! Generates a new ObjectId.
+		static OID				generate( void );
 
     private:
 
+		//! Actual object id.
         bson_oid_t              m_oid;
-    };
-
-    // ** BSON
-    class BSON {
-    public:
-
-        BSON&                   operator << ( int value );
-        BSON&                   operator << ( float value );
-		BSON&                   operator << ( double value );
-        BSON&                   operator << ( const BSON* value );
-        BSON&                   operator << ( const char* value );
-        BSON&                   operator << ( const std::string& value );
-        BSON&                   operator << ( const IntegerArray& value );
-        BSON&                   operator << ( const FloatArray& value );
-        BSON&                   operator << ( const OID& value );
-        BSON&                   operator << ( const BSON& value );
-
-        const bson_t*           value( void ) const;
-
-        std::string             toString( void ) const;
-        void                    remove( const std::string& key );
-
-        static BSON             array( void );
-        static BSON             object( void );
-        static BSON             fromBSON( const bson_t* bson );
-
-    public:
-
-                                BSON( bool isArray = false );
-                                BSON( const bson_t* value );
-
-        void                    nextKey( void );
-
-    private:
-
-        bool                    m_isArray;
-        std::string             m_key;
-        bson_t                  m_bson;
     };
 
     // ** class Cursor
@@ -151,37 +130,6 @@ namespace mongo {
     private:
 
         mongoc_bulk_operation_t*    m_bulk;
-    };
-
-    // ** class Collection
-    class Collection {
-    friend class Connection;
-    public:
-
-                                ~Collection( void );
-
-        void                    drop( void );
-        CursorPtr               find( const BSON& query = BSON::object() ) const;
-        DocumentPtr             findOne( const BSON& query ) const;
-        bool                    update( const BSON& query, const BSON& value );
-        bool                    upsert( const BSON& query, const BSON& value );
-        bool                    insert( const BSON& value );
-        bool                    remove( const BSON& query );
-        int                     count( const BSON& query = BSON::object() ) const;
-        void                    mergeWith( const CollectionPtr& other, bool drop = false );
-
-        bool                    ensureIndex( const std::string& name, const BSON& keys, bool unique = false );
-        bool                    dropIndex( const std::string& name );
-
-        BulkOperationPtr        createBulkOperation( void );
-
-    private:
-
-                                Collection( mongoc_collection_t* collection );
-
-    private:
-
-        mongoc_collection_t*    m_collection;
     };
 
     // ** class Connection
