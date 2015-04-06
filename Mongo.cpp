@@ -273,6 +273,7 @@ OID::OID( bson_oid_t oid ) : m_oid( oid )
 // ** OID::OID
 OID::OID( const std::string& oid )
 {
+	assert( oid.length() == 24 );
     bson_oid_init_from_string( &m_oid, oid.c_str() );
 }
 
