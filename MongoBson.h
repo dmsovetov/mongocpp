@@ -33,83 +33,186 @@
 
 namespace mongo {
 
+	//! BSON value type
+	enum ValueType {
+		BsonNull,
+		BsonBoolean,
+		BsonDouble,
+		BsonInt32,
+		BsonString,
+		BsonObject,
+		BsonArray
+	};
+
+	//! BSON object iterator.
+	class Iter {
+	public:
+
+								//! Constructs Iter instance.
+								Iter( const bson_t* bson );
+
+								//! Constructs Iter instance from BSON iterator.
+								Iter( bson_iter_t* iter );
+
+		//! Switches to a next value.
+		bool					next( void );
+
+		//! Returns raw iterator pointer.
+		bson_iter_t*			raw( void ) const;
+
+		//! Returns iterator value type.
+		ValueType				type( void ) const;
+
+		//! Returns current iterator key.
+		const char*				key( void ) const;
+
+		//! Returns boolean iterator value.
+		bool					toBool( void ) const;
+
+		//! Returns string iterator value.
+		const char*				toString( void ) const;
+
+		//! Returns integer iterator value.
+		int						toInt( void ) const;
+
+		//! Returns double iterator value.
+		double					toDouble( void ) const;
+
+		//! Returns array iterator value.
+		BSON					toArray( void ) const;
+
+		//! Returns object iterator value.
+		BSON					toObject( void ) const;
+
+	private:
+
+		//! BSON iterator pointer type.
+		typedef std::shared_ptr<bson_iter_t> BsonIteratorPtr;
+
+		//! Bson object iterator.
+		BsonIteratorPtr			m_iter;
+	};
+
+	//! BSON iterator pointer type.
+	typedef std::shared_ptr<Iter> IterPtr;
+
 	//! The BSON object wrapper.
     class BSON {
     public:
 
-		//! Appends an integer value.
-        BSON&                   operator << ( int value );
+		//! Returns an iterator.
+		IterPtr					iter( void ) const;
 
-		//! Appends a double value.
-        BSON&                   operator << ( float value );
+		//! Finds a field with a specified key.
+		IterPtr					find( const char* key );
 
-		//! Appends a double value.
-		BSON&                   operator << ( double value );
+		//! Return the raw BSON pointer.
+		bson_t*					raw( void ) const;
 
-		//! Appends a nested BSON.
-        BSON&                   operator << ( const BSON* value );
+		//! Copies the raw BSON value.
+		bson_t*					copy( void ) const;
 
-		//! Appends a nested BSON
-        BSON&                   operator << ( const BSON& value );
+		//! Appends boolean value to BSON.
+		void					set( const char* key, bool value );
 
-		//! Appends a string.
-        BSON&                   operator << ( const char* value );
+		//! Appends integer value to BSON.
+		void					set( const char* key, int value );
 
-		//! Appends a string.
-        BSON&                   operator << ( const std::string& value );
+		//! Appends double value to BSON.
+		void					set( const char* key, double value );
 
-		//! Appends an array of integers.
-        BSON&                   operator << ( const IntegerArray& value );
+		//! Appends string value to BSON.
+		void					set( const char* key, const char* value );
+		void					set( const char* key, const std::string& value );
 
-		//! Appends an array of doubles.
-        BSON&                   operator << ( const FloatArray& value );
+		//! Appends ObjectId value to BSON.
+		void					set( const char* key, const OID& value );
 
-		//! Appends an ObjectId.
-        BSON&                   operator << ( const OID& value );
+		//! Appends null to BSON.
+		void					setNull( const char* key );
 
-		//! Return the internal BSON object.
-        const bson_t*			value( void ) const;
+		//! Appends document value to BSON.
+		void					setDocument( const char* key, const BSON& value );
 
-		//! Converts the BSON object to a string.
-        std::string             toString( void ) const;
-
-		//! Removes the field from a BSON.
-        void                    remove( const std::string& key );
-
-		//! Constructs an array BSON object.
-        static BSON             array( void );
+		//! Appends array value to BSON.
+		void					setArray( const char* key, const BSON& value );
 
 		//! Constructs a BSON object.
         static BSON             object( void );
 
-		//! Constructs a BSON object from internal MongoDB BSON. 
-        static BSON             fromBSON( const bson_t* bson );
-
     public:
 
-		//! Internal BSON pointer type.
-		typedef std::shared_ptr<bson_t>	BsonPtr;
 
-								//! Constructs a BSON instance.
-                                BSON( bool isArray = false );
+								//! Constructs BSON instance with a specified type.
+								BSON( void );
 
-								//! Constructs a BSON instance from internal MongoDB BSON.
-                                BSON( const BsonPtr& bson );
-
-		//! Generates a next BSON key.
-        void                    nextKey( void );
+								//! Constructs BSON instante from internal MongoDB BSON.
+								BSON( bson_t* bson );
 
     private:
 
-		//! The flag indicating this is an array BSON.
-        bool                    m_isArray;
-
-		//! Current BSON write key.
-        std::string             m_key;
+		//! BSON pointer type.
+		typedef std::shared_ptr<bson_t> BsonPtr;
 
 		//! Internal BSON object.
 		BsonPtr					m_bson;
     };
+
+	class ArraySelector;
+
+	//! A BSON document wrapper to simplify selector construction.
+	class DocumentSelector : public BSON {
+	public:
+
+		//! Appends ObjectId value to selector.
+		DocumentSelector&	operator << ( const OID& value );
+
+		//! Appends string value to selector.
+		DocumentSelector&	operator << ( const char* value );
+		DocumentSelector&	operator << ( const std::string& value );
+
+		//! Concatenates two selectors.
+		DocumentSelector&	operator << ( const DocumentSelector& value );
+
+		//! Appends arary value to selector.
+		DocumentSelector&	operator << ( const ArraySelector& value );
+
+	protected:
+
+		//! Active key.
+		std::string			m_key;
+	};
+
+	//! A BSON array wrapper to simplify selector construction.
+	class ArraySelector : public BSON {
+	public:
+
+							//! Constructs ArraySelector instance.
+							ArraySelector( void );
+
+		//! Appends ObjectId value to selector.
+		ArraySelector&		operator << ( const OID& value );
+
+		//! Appends string value to selector.
+		ArraySelector&		operator << ( const char* value );
+		ArraySelector&		operator << ( const std::string& value );
+
+		//! Appends document to an array selector.
+		ArraySelector&		operator << ( const DocumentSelector& value );
+
+		//! Appends array to an array selector.
+		ArraySelector&		operator << ( const ArraySelector& value );
+
+	private:
+
+		//! Generates a key string.
+		std::string			key( void );
+
+	private:
+
+		//! Current array index.
+		int					m_index;
+	};
 
 } // namespace mongo
 

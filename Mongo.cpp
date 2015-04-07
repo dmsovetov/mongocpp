@@ -65,7 +65,7 @@ BulkOperation::~BulkOperation( void )
 // ** BulkOperation::insert
 void BulkOperation::insert( const BSON& document )
 {
-    mongoc_bulk_operation_insert( m_bulk, document.value() );
+    mongoc_bulk_operation_insert( m_bulk, document.raw() );
 }
 
 // ** BulkOperation::execute
@@ -181,7 +181,7 @@ int Document::integer( const char* key ) const
 
 
 // ** Document::value
-const bson_t* Document::value( void ) const
+bson_t* Document::value( void ) const
 {
     return m_document;
 }
@@ -205,6 +205,12 @@ DocumentPtr Document::array( const char* key ) const
     }
 
     return NULL;
+}
+
+// ** Document::object
+DocumentPtr Document::object( const char* key ) const
+{
+	return DocumentPtr();
 }
 
 // ** Document::keys
@@ -258,6 +264,29 @@ FloatArray Document::numbers( const char* key ) const
         while( bson_iter_next( &i ) ) {
             assert( bson_iter_type( &i ) == BSON_TYPE_DOUBLE );
             result.push_back( ( float )bson_iter_double( &i ) );
+        }
+    }
+    
+    return result;
+}
+
+
+// ** Document::strings
+StringArray Document::strings( const char* key ) const
+{
+    bson_iter_t iter, field;
+    StringArray  result;
+
+    if( bson_iter_init( &iter, m_document ) && bson_iter_find_descendant( &iter, key, &field ) ) {
+        assert( bson_iter_type( &field ) == BSON_TYPE_ARRAY );
+
+        bson_iter_t i;
+        bson_iter_recurse( &field, &i );
+
+        while( bson_iter_next( &i ) ) {
+			assert( bson_iter_type( &i ) == BSON_TYPE_UTF8 );
+			uint32_t length;
+			result.push_back( bson_iter_utf8( &i, &length ) );
         }
     }
     

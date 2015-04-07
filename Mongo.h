@@ -36,9 +36,9 @@
 #include <string>
 #include <memory>
 
-#define DOCUMENT( x )   (mongo::BSON::object() << x)
-#define ARRAY( x )      (mongo::BSON::array()  << x)
-#define QUERY( x )       mongo::BSON::object() << x
+#define DOCUMENT( x )   (mongo::DocumentSelector() << x)
+#define ARRAY( x )      (mongo::ArraySelector()	   << x)
+#define SELECTOR( x )	 mongo::DocumentSelector() << x
 #define NIL             (mongo::BSON*)NULL
 
 namespace mongo {
@@ -52,6 +52,7 @@ namespace mongo {
     typedef std::set<int>                           IntegerSet;
 	typedef std::vector<int>						IntegerArray;
     typedef std::vector<float>                      FloatArray;
+	typedef std::vector<std::string>				StringArray;
 
 	class BSON;
 
@@ -154,16 +155,18 @@ namespace mongo {
 
                                 ~Document( void );
 
-        const bson_t*           value( void ) const;
+        bson_t*					value( void ) const;
         OID                     _id( void ) const;
         OID                     objectId( const char* key ) const;
         std::string             string( const char* key ) const;
         double                  number( const char* key ) const;
         int                     integer( const char* key ) const;
         DocumentPtr             array( const char* key ) const;
+		DocumentPtr				object( const char* key ) const;
         StringSet               keys( void ) const;
         IntegerSet              integerSet( const char* key ) const;
         FloatArray              numbers( const char* key ) const;
+		StringArray				strings( const char* key ) const;
 
     private:
 
