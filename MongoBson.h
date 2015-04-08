@@ -40,8 +40,9 @@ namespace mongo {
 		BsonDouble,
 		BsonInt32,
 		BsonString,
+		BsonObjectId,
 		BsonObject,
-		BsonArray
+		BsonArray,
 	};
 
 	//! BSON object iterator.
@@ -77,6 +78,9 @@ namespace mongo {
 
 		//! Returns double iterator value.
 		double					toDouble( void ) const;
+
+		//! Returns ObjectId iterator value.
+		OID						toObjectId( void ) const;
 
 		//! Returns array iterator value.
 		BSON					toArray( void ) const;
@@ -170,6 +174,9 @@ namespace mongo {
 		//! Appends string value to selector.
 		DocumentSelector&	operator << ( const char* value );
 		DocumentSelector&	operator << ( const std::string& value );
+
+		//! Appends null to selector.
+		DocumentSelector&	operator << ( const BSON* value );
 
 		//! Concatenates two selectors.
 		DocumentSelector&	operator << ( const DocumentSelector& value );

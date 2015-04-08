@@ -117,7 +117,13 @@ bson_t* BSON::raw( void ) const
 // ** BSON::iter
 IterPtr BSON::iter( void ) const
 {
-	return IterPtr( new Iter( m_bson.get() ) );
+	IterPtr result( new Iter( m_bson.get() ) );
+
+	if( !result->raw() ) {
+		return IterPtr();
+	}
+
+	return result;
 }
 
 // ** BSON::find
@@ -163,6 +169,16 @@ DocumentSelector& DocumentSelector::operator << ( const char* value )
 DocumentSelector& DocumentSelector::operator << ( const std::string& value )
 {
 	return *this << value.c_str();
+}
+
+// ** DocumentSelector::operator <<
+DocumentSelector& DocumentSelector::operator << ( const BSON* value )
+{
+	assert( m_key.c_str() != "" );
+	setNull( m_key.c_str() );
+	m_key = "";
+
+	return *this;
 }
 
 // ** DocumentSelector::operator <<
@@ -239,8 +255,13 @@ std::string ArraySelector::key( void )
 Iter::Iter( const bson_t* bson )
 {
 	m_iter = BsonIteratorPtr( new bson_iter_t );
-	bson_iter_init( raw(), bson );
-	bson_iter_next( raw() );
+	
+	if( !bson_iter_init( raw(), bson ) ) {
+		m_iter = BsonIteratorPtr();
+	}
+	else if( !bson_iter_next( raw() ) ) {
+		m_iter = BsonIteratorPtr();
+	}
 }
 
 // ** Iter::Iter
@@ -262,6 +283,7 @@ ValueType Iter::type( void ) const
 	case BSON_TYPE_BOOL:		return BsonBoolean;
 	case BSON_TYPE_INT32:		return BsonInt32;
 	case BSON_TYPE_DOUBLE:		return BsonDouble;
+	case BSON_TYPE_OID:			return BsonObjectId;
 	case BSON_TYPE_UTF8:		return BsonString;
 	case BSON_TYPE_ARRAY:		return BsonArray;
 	case BSON_TYPE_DOCUMENT:	return BsonObject;
@@ -311,6 +333,17 @@ double Iter::toDouble( void ) const
 
 	return 0.0;
 }
+
+// ** Iter::toObjectId
+OID Iter::toObjectId( void ) const
+{
+	if( bson_iter_type( raw() ) == BSON_TYPE_OID ) {
+		return OID( *bson_iter_oid( raw() ) );
+	}
+
+	return OID( "000000000000000000000000" );
+}
+
 
 // ** Iter::toString
 const char* Iter::toString( void ) const
