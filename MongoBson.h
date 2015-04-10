@@ -168,27 +168,40 @@ namespace mongo {
 	class DocumentSelector : public BSON {
 	public:
 
+		//! Appends boolean value to selector.
+		DocumentSelector&			operator << ( bool value );
+
 		//! Appends ObjectId value to selector.
-		DocumentSelector&	operator << ( const OID& value );
+		DocumentSelector&			operator << ( const OID& value );
 
 		//! Appends string value to selector.
-		DocumentSelector&	operator << ( const char* value );
-		DocumentSelector&	operator << ( const std::string& value );
+		DocumentSelector&			operator << ( const char* value );
+		DocumentSelector&			operator << ( const std::string& value );
 
 		//! Appends null to selector.
-		DocumentSelector&	operator << ( const BSON* value );
+		DocumentSelector&			operator << ( const BSON* value );
 
 		//! Concatenates two selectors.
-		DocumentSelector&	operator << ( const DocumentSelector& value );
+		DocumentSelector&			operator << ( const DocumentSelector& value );
 
 		//! Appends arary value to selector.
-		DocumentSelector&	operator << ( const ArraySelector& value );
+		DocumentSelector&			operator << ( const ArraySelector& value );
+
+		//! Constructs an ObjectId selector.
+		static DocumentSelector		byId( const OID& oid );
+		static DocumentSelector		byId( const std::string& oid );
+
+		//! Constructs selector that checks for existance of a specified field.
+		static DocumentSelector		exists( const char* field, bool value = true );
 
 	protected:
 
 		//! Active key.
-		std::string			m_key;
+		std::string					m_key;
 	};
+
+	//! A shortcut for DocumentSelector class.
+	typedef DocumentSelector Selector;
 
 	//! A BSON array wrapper to simplify selector construction.
 	class ArraySelector : public BSON {

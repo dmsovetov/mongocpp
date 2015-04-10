@@ -153,6 +153,16 @@ DocumentSelector& DocumentSelector::operator << ( const OID& value )
 }
 
 // ** DocumentSelector::operator <<
+DocumentSelector& DocumentSelector::operator << ( bool value )
+{
+	assert( m_key != "" );
+	set( m_key.c_str(), value );
+	m_key = "";
+
+	return *this;
+}
+
+// ** DocumentSelector::operator <<
 DocumentSelector& DocumentSelector::operator << ( const char* value )
 {
 	if( m_key == "" ) {
@@ -199,6 +209,24 @@ DocumentSelector& DocumentSelector::operator << ( const ArraySelector& value )
 	m_key = "";
 
 	return *this;
+}
+
+// ** DocumentSelector::byId
+DocumentSelector DocumentSelector::byId( const OID& oid )
+{
+	return SELECTOR( "_id" << oid );
+}
+
+// ** DocumentSelector::byId
+DocumentSelector DocumentSelector::byId( const std::string& oid )
+{
+	return SELECTOR( "_id" << OID( oid ) );
+}
+
+// ** DocumentSelector::exists
+DocumentSelector DocumentSelector::exists( const char* field, bool value )
+{
+	return SELECTOR( field << DOCUMENT( "$exists" << value ) );
 }
 
 // -------------------------------------- ArraySelector ------------------------------------- //
