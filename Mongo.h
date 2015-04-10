@@ -29,8 +29,20 @@
 #ifndef __Mongocpp_Mongo_H__
 #define __Mongocpp_Mongo_H__
 
-#include <mongoc.h>
-#include <bcon.h>
+#ifdef MONGO_BUILD_LIBRARY
+	#include <mongoc.h>
+	#include <bcon.h>
+#else
+	struct mongoc_client_t;
+	struct mongoc_cursor_t;
+	struct mongoc_collection_t;
+	struct mongoc_bulk_operation_t;
+
+	struct bson_t;
+	struct bson_oid_t;
+	struct bson_iter_t;
+#endif
+
 #include <set>
 #include <vector>
 #include <string>
@@ -69,7 +81,7 @@ namespace mongo {
     public:
 
 								//! Constructs OID instance from BSON object id.
-                                OID( bson_oid_t oid );
+                                OID( const bson_oid_t& oid );
 
 								//! Construcst OID instance from ObjectId string.
                                 OID( const std::string& oid );
@@ -78,7 +90,7 @@ namespace mongo {
         bool                    operator == ( const OID& other ) const;
 
 		//! Returns the BSON ObjectId value.
-        const bson_oid_t*       value( void ) const;
+        bson_oid_t*				raw( void ) const;
 
 		//! Returns a byte representation of an ObjectId.
 		const unsigned char*	bytes( void ) const;
@@ -91,8 +103,11 @@ namespace mongo {
 
     private:
 
+		//! Internal BSON object id pointer type.
+		typedef std::shared_ptr<bson_oid_t> BsonObjectIdPtr;
+
 		//! Actual object id.
-        bson_oid_t              m_oid;
+        BsonObjectIdPtr			m_oid;
     };
 
     // ** class Cursor

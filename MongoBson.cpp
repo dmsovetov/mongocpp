@@ -81,7 +81,7 @@ void BSON::set( const char* key, const char* value )
 // ** BSON::set
 void BSON::set( const char* key, const OID& value )
 {
-	bson_append_oid( raw(), key, strlen( key ), value.value() );
+	bson_append_oid( raw(), key, strlen( key ), value.raw() );
 }
 
 // ** BSON::setNull

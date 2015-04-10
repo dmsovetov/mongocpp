@@ -294,22 +294,22 @@ StringArray Document::strings( const char* key ) const
 }
 
 // ** OID::OID
-OID::OID( bson_oid_t oid ) : m_oid( oid )
+OID::OID( const bson_oid_t& oid )
 {
-
+	bson_oid_copy( &oid, raw() );
 }
 
 // ** OID::OID
 OID::OID( const std::string& oid )
 {
 	assert( oid.length() == 24 );
-    bson_oid_init_from_string( &m_oid, oid.c_str() );
+    bson_oid_init_from_string( raw(), oid.c_str() );
 }
 
-// ** OID::value
-const bson_oid_t* OID::value( void ) const
+// ** OID::raw
+bson_oid_t* OID::raw( void ) const
 {
-    return &m_oid;
+	return m_oid.get();
 }
 
 // ** OID::generate
@@ -323,21 +323,21 @@ OID OID::generate( void )
 // ** OID::bytes
 const unsigned char* OID::bytes( void ) const
 {
-	return m_oid.bytes;
+	return m_oid->bytes;
 }
 
 // ** OID::toString
 std::string OID::toString( void ) const
 {
     char str[64];
-    bson_oid_to_string( &m_oid, str );
+    bson_oid_to_string( raw(), str );
     return str;
 }
 
 // ** OID::operator ==
 bool OID::operator == ( const OID& other ) const
 {
-    return bson_oid_equal( &m_oid, &other.m_oid );
+    return bson_oid_equal( raw(), other.raw() );
 }
 
 } // namespace mongo
