@@ -72,7 +72,7 @@ namespace mongo {
 	inline std::string toString( int value )
 	{
 		char buf[32];
-		sprintf_s( buf, 32, "%d", value );
+		snprintf( buf, 32, "%d", value );
 		return buf;
 	}
 
