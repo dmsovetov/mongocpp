@@ -274,7 +274,11 @@ ArraySelector& ArraySelector::operator << ( const ArraySelector& value )
 std::string ArraySelector::key( void )
 {
 	char buffer[16];
+#ifdef WIN32
+	sprintf_s( buffer, 16, "%d", m_index++ );
+#else
 	sprintf( buffer, "%d", m_index++ );
+#endif
 	return buffer;
 }
 
