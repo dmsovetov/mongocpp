@@ -274,7 +274,8 @@ ArraySelector& ArraySelector::operator << ( const ArraySelector& value )
 std::string ArraySelector::key( void )
 {
 	char buffer[16];
-	return itoa( m_index++, buffer, 10 );
+	sprintf( buffer, "%d", m_index++ );
+	return buffer;
 }
 
 // ---------------------------------------- Iter --------------------------------------- //
